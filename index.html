@@ -186,6 +186,7 @@
             var query = event.target[0].value;
             var templateId = event.target[1].value;
             var msgData = { msg: query, templateId: templateId };
+            console.log(`messea data:\n\n\n\n\n` + JSON.stringify(msgData) + '\n\n\n\n\n\n');
             XavChatWidget.BotPlugin.sendMessage(msgData);
         }
 
