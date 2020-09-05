@@ -2,13 +2,277 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
+
+    <title>TI Demo Bot</title>
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello worldn</title>
+    <script type="text/javascript" src="https://widget-mdev.xavlab.xyz/libs/botPlugin.js"></script>
+    <style>
+        body {
+            overflow-x: hidden;
+        }
+
+        .container-bot {
+            display: none;
+            height: 100%;
+            width: 380px;
+            position: absolute;
+            right: 0;
+            top: 0;
+        }
+
+        .chatbot-container {
+            height: calc(100% - 50px);
+            width: 100%;
+            position: absolute;
+            top: 50px;
+        }
+
+        .minimize-end {
+            text-align: center;
+            margin: 10px;
+        }
+
+        .chat-icon1 {
+            background-color: rgb(75, 40, 109);
+            width: 55px;
+            height: 55px;
+            position: absolute;
+            bottom: -13px;
+            text-align: center;
+            margin: 0px auto;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgb(255, 255, 255);
+            border-image: initial;
+            border-radius: 50%;
+            right: 0;
+            bottom: 0;
+            margin: 20px;
+        }
+
+        .chat-icon1 img {
+            position: relative;
+            top: 12px;
+            max-height: 100%;
+            cursor: pointer;
+        }
+
+        .chat-icon2 {
+            background-color: rgb(75, 40, 109);
+            width: 55px;
+            height: 55px;
+            position: absolute;
+            bottom: -13px;
+            text-align: center;
+            margin: 0px auto;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgb(255, 255, 255);
+            border-image: initial;
+            border-radius: 50%;
+            right: 100;
+            bottom: 0;
+            margin: 20px;
+        }
+
+        .chat-icon2 img {
+            position: relative;
+            top: 12px;
+            max-height: 100%;
+            cursor: pointer;
+        }
+
+        /* The Modal (background) */
+        .modal {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Stay in place */
+            z-index: 1;
+            /* Sit on top */
+            padding-top: 100px;
+            /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            overflow: auto;
+            /* Enable scroll if needed */
+            background-color: rgb(0, 0, 0);
+            /* Fallback color */
+            background-color: rgba(0, 0, 0, 0.4);
+            /* Black w/ opacity */
+        }
+
+        /* Modal Content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        /* Modal image */
+        .modal-img {
+            margin: auto;
+            max-height: 500px;
+        }
+
+        /* The Close Button */
+        .close {
+            color: #aaaaaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .custom-query {
+            width: 200px;
+            height: 200px;
+        }
+    </style>
 </head>
 
 <body>
+    <div class="container-bot" id="container-bot">
+        <div class="minimize-end">
+            <button onclick="minimizeChat()">Minimize Chat</button><button onclick="endChat()">End Chat</button>
+        </div>
+        <div class="chatbot-container" id="chatbot-container"></div>
+    </div>
+    <div id="custom-query" class="custom-query">
+        <form id="query-form">
+            <label for="fname">Query:</label><br>
+            <input type="text" id="query" name="query"><br><br>
+            <label for="lname">Template ID:</label><br>
+            <input type="text" id="templateId" name="templateId"><br><br>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    <div id="chat-icon1" class="chat-icon1"><img onclick="openChat()" class="sc-kpOJdX iNThCM"
+            src="./images/chat-icon-bar.svg" alt="Need Help? Let's chat." /></div>
+    <div id="chat-icon2" class="chat-icon2"><img onclick="openChat()" class="sc-kpOJdX iNThCM"
+            src="./images/chat-icon-bar.svg" alt="Need Help? Let's chat." /></div>
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span id="modal-close" class="close">&times;</span>
+            <img id="modal-img" class="modal-img" id="img01">
+        </div>
+    </div>
+    <script type="text/javascript">
+        var isChatMinimized = false;
+        var isChatEnded = false;
+        var modal = document.getElementById('myModal');
+        var modalClose = document.getElementById('modal-close');
+        var customQuery = document.getElementById('custom-query');
+        customQuery.style.display = "none";
 
+
+        function querySubmit(event) {
+            event.preventDefault();
+            var query = event.target[0].value;
+            var templateId = event.target[1].value;
+            var msgData = { msg: query, templateId: templateId };
+            XavChatWidget.BotPlugin.sendMessage(msgData);
+        }
+
+        const queryForm = document.getElementById('query-form');
+        queryForm.addEventListener('submit', querySubmit);
+
+        // When the user clicks on <span> (x), close the modal
+        modalClose.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        function minimizeChat() {
+            isChatMinimized = true;
+            XavChatWidget.BotPlugin.toggleChat(false);
+            showHideChat();
+        }
+
+        function showHideChat() {
+            var containerBot = document.getElementById("container-bot");
+            var chatIcon1 = document.getElementById("chat-icon1");
+            var chatIcon2 = document.getElementById("chat-icon2");
+            if (containerBot.style.display === "none" || containerBot.style.display === "") {
+                containerBot.style.display = "block";
+                customQuery.style.display = "block";
+            } else {
+                containerBot.style.display = "none";
+                customQuery.style.display = "none";
+            }
+            if (chatIcon1.style.display === "block" || chatIcon1.style.display === "") {
+                chatIcon1.style.display = "none";
+            } else {
+                chatIcon1.style.display = "block";
+            }
+            if (chatIcon2.style.display === "block" || chatIcon2.style.display === "") {
+                chatIcon2.style.display = "none";
+            } else {
+                chatIcon2.style.display = "block";
+            }
+        }
+        function endChat() {
+            XavChatWidget.BotPlugin.endChat();
+            isChatEnded = true;
+            showHideChat();
+        }
+
+        function openChat(openInBg = false) {
+            if (!openInBg) {
+                showHideChat();
+            }
+
+            if (isChatMinimized || isChatEnded) {
+                isChatMinimized = false;
+                isChatEnded = false;
+                XavChatWidget.BotPlugin.toggleChat(true);
+                return;
+            }
+            if (openInBg) {
+                isChatMinimized = true;
+            }
+            XavChatWidget.BotPlugin.init("19U0zFPymjpa5NP94ADZ4O9ZUQ8",
+                {
+                    parentElementId: "chatbot-container",
+                    extraData: {
+                        username: "Test",
+                        email: "test@test.com",
+                        phone: "",
+                        toggler: false,
+                        isCustomizedWidth: true
+                    },
+                    analyticsCallback: function (callbackData) {
+                        console.log("Analytics Data:::", callbackData);
+                    },
+                    liveHandOffCallback: function (callbackData) {
+                        console.log("liveHandOff Data:::", callbackData);
+                    },
+                    onImageClicked: function (callbackData) {
+                        console.log("imageClick Data:::", callbackData);
+                        var imageUrl = callbackData.eventData[0];
+                        modal.style.display = "block";
+                        var modalImg = document.getElementById('modal-img');
+                        modalImg.src = imageUrl;
+                    }
+                }
+            );
+        }
+        openChat(true);
+    </script>
 </body>
 
 </html>
